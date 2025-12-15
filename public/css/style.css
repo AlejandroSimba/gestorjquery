@@ -184,3 +184,13 @@ body {
         font-size: 0.9rem;
     }
 }
+
+/* Animación para las nuevas filas */
+.fade-in-row {
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn{
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+}
