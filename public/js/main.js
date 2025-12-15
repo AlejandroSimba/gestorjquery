@@ -87,6 +87,94 @@ $(document).ready(function() {
             showConfirmButton: false
         });
     });
+    // 
+    //  APORTE EVELYN CONDOY (
+    // 
 
+    function aplicarFiltros() {
+        // 1. Capturar valores de los inputs
+        const categoriaFiltro = $('#filterCategory').val();
+        const textoBusqueda = $('#searchProduct').val().toLowerCase();
+        const ordenPrecio = $('#sortPrice').val();
+
+        let resultados = [];
+
+        // 2. Filtrado usando CICLOS y CONDICIONALES (Requisito Rúbrica)
+        for (let i = 0; i < productos.length; i++) {
+            let prod = productos[i];
+            
+            let cumpleCategoria = false;
+            let cumpleBusqueda = false;
+
+            // --- Punto 3: Filtro por Categoría ---
+            if (categoriaFiltro === 'all') {
+                cumpleCategoria = true;
+            } else {
+                if (prod.categoria === categoriaFiltro) {
+                    cumpleCategoria = true;
+                }
+            }
+
+            // --- Punto 4: Buscador en Vivo ---
+            // Usamos indexOf para buscar texto parcial
+            if (prod.nombre.toLowerCase().indexOf(textoBusqueda) !== -1) {
+                cumpleBusqueda = true;
+            }
+
+            // Solo agregamos si cumple AMBAS condiciones
+            if (cumpleCategoria === true && cumpleBusqueda === true) {
+                resultados.push(prod);
+            }
+        }
+
+        // --- Punto 5: Ordenamiento por Precio ---
+        if (ordenPrecio !== '') {
+            if (ordenPrecio === 'asc') {
+                resultados.sort(function(a, b) {
+                    return a.precio - b.precio;
+                });
+            } else if (ordenPrecio === 'desc') {
+                resultados.sort(function(a, b) {
+                    return b.precio - a.precio;
+                });
+            }
+        }
+
+        // Renderizamos la tabla con la lista filtrada y ordenada
+        renderizarTabla(resultados);
+    }
+
+    // --- EVENTOS (Listeners) ---
+
+    // Evento Change para Categoría
+    $('#filterCategory').on('change', function() {
+        aplicarFiltros();
+    });
+
+    // Evento Keyup para Buscador
+    $('#searchProduct').on('keyup', function() {
+        aplicarFiltros();
+    });
+
+    // Evento Change para Ordenar
+    $('#sortPrice').on('change', function() {
+        aplicarFiltros();
+    });
+
+    // Funcionalidad extra: Limpiar todo
+    $('#clearAll').on('click', function() {
+        $('#filterCategory').val('all');
+        $('#searchProduct').val('');
+        $('#sortPrice').val('');
+        aplicarFiltros();
+    });
+
+    // 
+    // FIN APORTE EVELYN CONDOY
+    // 
+
+    // Carga inicial
     renderizarTabla();
 });
+
+    
