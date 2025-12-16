@@ -1,35 +1,30 @@
 $(document).ready(function() {
     
+    // ======================================================
+    // ZONA 1: CÓDIGO COMÚN Y DE TU COMPAÑERO (NO TOCAR)
+    // ======================================================
+    
     // Array global de productos
     let productos = [];
 
-    // 
-    // FUNCIÓN DE RENDERIZADO 
-    // 
-    function renderizarTabla(listaOpcional) {
-        // Si hay una lista filtrada, usamos esa. Si no, usamos 'productos'
-        const datosAMostrar = listaOpcional || productos;
-
+    // --- FUNCIÓN DE TU COMPAÑERO (INTACTA) ---
+    // Esta función solo sabe mostrar TODOS los productos.
+    function renderizarTabla() {
         const tbody = $('#productTableBody');
         const emptyMessage = $('#emptyTableMessage'); 
         const countBadge = $('#productCount');
 
-        // Limpiar contenido actual
+        // Limpieza básica
         tbody.find('tr:not(#emptyTableMessage)').remove();
+        countBadge.text(`${productos.length} productos`);
 
-        // Actualizar contador
-        countBadge.text(`${datosAMostrar.length} productos`);
-
-        // Mostrar u ocultar mensaje de vacío
-        if (datosAMostrar.length === 0) {
+        if (productos.length === 0) {
             emptyMessage.show();
         } else {
             emptyMessage.hide();
-        
-            // Recorrer el array y crear filas
-            datosAMostrar.forEach(function(producto) {
+            // Bucle original de tu compañero
+            productos.forEach(function(producto) {
                 const precioFormateado = parseFloat(producto.precio).toFixed(2);
-
                 const nuevaFila = `
                     <tr class="fade-in-row">
                         <td class="ps-4 fw-bold text-secondary">#${producto.id}</td>
@@ -48,23 +43,15 @@ $(document).ready(function() {
         }
     }
 
-    // ==========================================
-    // FUNCIÓN AGREGAR (PUNTO 1)
-    // ==========================================
+    // --- AGREGAR PRODUCTO (INTACTO) ---
     $('#productForm').on('submit', function(e) {
         e.preventDefault();
-
         const nombre = $('#productName').val().trim();
         const precio = parseFloat($('#productPrice').val());
         const categoria = $('#productCategory').val();
 
         if (nombre === '' || isNaN(precio) || precio <= 0 || categoria === null) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Datos incompletos',
-                text: 'Por favor llena todos los campos correctamente.',
-                confirmButtonColor: '#d33'
-            });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Datos incompletos' });
             return;
         }
 
@@ -80,103 +67,108 @@ $(document).ready(function() {
         $('#productForm')[0].reset();
         $('#productName').focus();
 
-        // Actualizamos la tabla (respetando filtros si existen)
-        aplicarFiltros(); 
+        // AQUÍ LLAMA A LA FUNCIÓN DE TU COMPAÑERO (Muestra todos)
+        renderizarTabla(); 
 
-        Swal.fire({
-            icon: 'success',
-            title: '¡Producto Agregado!',
-            text: `${nombre} se ha guardado correctamente.`,
-            timer: 2000,
-            showConfirmButton: false
-        });
+        Swal.fire({ icon: 'success', title: 'Agregado', timer: 1500, showConfirmButton: false });
     });
 
-    // =====================================================================
-    // INICIO APORTE EVELYN CONDOY (Puntos 3, 4 y 5)
-    // =====================================================================
 
-    function aplicarFiltros() {
-        // 1. Capturar valores de los inputs
-        const categoriaFiltro = $('#filterCategory').val();
-        const textoBusqueda = $('#searchProduct').val().toLowerCase();
-        const ordenPrecio = $('#sortPrice').val();
+    // ======================================================
+    // ZONA 2: CÓDIGO DE EVELYN CONDOY (PUNTOS 3, 4 y 5)
+    // ======================================================
+
+    // 1. FUNCIÓN DE RENDERIZADO
+    // lista como parámetro
+    function renderizarTablaEvelyn(listaFiltrada) {
+        const tbody = $('#productTableBody');
+        const emptyMessage = $('#emptyTableMessage'); 
+        const countBadge = $('#productCount');
+
+        // Limpiamos la tabla
+        tbody.find('tr:not(#emptyTableMessage)').remove();
+        
+        // Actualizamos contador con TU lista
+        countBadge.text(`${listaFiltrada.length} productos`);
+
+        if (listaFiltrada.length === 0) {
+            emptyMessage.show();
+        } else {
+            emptyMessage.hide();
+            
+            // Usamos TU lista filtrada para pintar
+            listaFiltrada.forEach(function(producto) {
+                const precioFormateado = parseFloat(producto.precio).toFixed(2);
+                const fila = `
+                    <tr class="fade-in-row">
+                        <td class="ps-4 fw-bold text-secondary">#${producto.id}</td>
+                        <td><span class="fw-bold">${producto.nombre}</span></td>
+                        <td><span class="badge bg-light text-dark border">$${precioFormateado}</span></td>
+                        <td><span class="badge bg-info text-dark bg-opacity-25 border border-info">${producto.categoria}</span></td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${producto.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(fila);
+            });
+        }
+    }
+
+    // 2. LÓGICA DE FILTROS
+    function aplicarFiltrosEvelyn() {
+        const cat = $('#filterCategory').val();
+        const busqueda = $('#searchProduct').val().toLowerCase();
+        const orden = $('#sortPrice').val();
 
         let resultados = [];
 
-        // 2. Filtrado usando CICLOS y CONDICIONALES (Requisito Rúbrica)
+        // Ciclo FOR y IF (Requisito Rúbrica)
         for (let i = 0; i < productos.length; i++) {
-            let prod = productos[i];
-            
-            let cumpleCategoria = false;
-            let cumpleBusqueda = false;
+            let p = productos[i];
+            let pasaCat = false;
+            let pasaBus = false;
 
-            // --- Punto 3: Filtro por Categoría ---
-            if (categoriaFiltro === 'all') {
-                cumpleCategoria = true;
-            } else {
-                if (prod.categoria === categoriaFiltro) {
-                    cumpleCategoria = true;
-                }
+            // Filtro Categoría
+            if (cat === 'all' || p.categoria === cat) {
+                pasaCat = true;
             }
 
-            // --- Punto 4: Buscador en Vivo ---
-            // Usamos indexOf para buscar texto parcial
-            if (prod.nombre.toLowerCase().indexOf(textoBusqueda) !== -1) {
-                cumpleBusqueda = true;
+            // Filtro Buscador
+            if (p.nombre.toLowerCase().indexOf(busqueda) !== -1) {
+                pasaBus = true;
             }
 
-            // Solo agregamos si cumple AMBAS condiciones
-            if (cumpleCategoria === true && cumpleBusqueda === true) {
-                resultados.push(prod);
+            if (pasaCat && pasaBus) {
+                resultados.push(p);
             }
         }
 
-        // --- Punto 5: Ordenamiento por Precio ---
-        if (ordenPrecio !== '') {
-            if (ordenPrecio === 'asc') {
-                resultados.sort(function(a, b) {
-                    return a.precio - b.precio;
-                });
-            } else if (ordenPrecio === 'desc') {
-                resultados.sort(function(a, b) {
-                    return b.precio - a.precio;
-                });
-            }
+        // Ordenamiento
+        if (orden === 'asc') {
+            resultados.sort((a, b) => a.precio - b.precio);
+        } else if (orden === 'desc') {
+            resultados.sort((a, b) => b.precio - a.precio);
         }
 
-        // Renderizamos la tabla con la lista filtrada y ordenada
-        renderizarTabla(resultados);
+        // IMPORTANTE: Aquí llamamos a TU función, no a la de tu compañero
+        renderizarTablaEvelyn(resultados);
     }
 
-    // --- EVENTOS (Listeners) ---
+    // 3.  EVENTOS
+    $('#filterCategory').on('change', function() { aplicarFiltrosEvelyn(); });
+    $('#searchProduct').on('keyup', function() { aplicarFiltrosEvelyn(); });
+    $('#sortPrice').on('change', function() { aplicarFiltrosEvelyn(); });
 
-    // Evento Change para Categoría
-    $('#filterCategory').on('change', function() {
-        aplicarFiltros();
-    });
-
-    // Evento Keyup para Buscador
-    $('#searchProduct').on('keyup', function() {
-        aplicarFiltros();
-    });
-
-    // Evento Change para Ordenar
-    $('#sortPrice').on('change', function() {
-        aplicarFiltros();
-    });
-
-    // Funcionalidad extra: Limpiar todo
     $('#clearAll').on('click', function() {
         $('#filterCategory').val('all');
         $('#searchProduct').val('');
         $('#sortPrice').val('');
-        aplicarFiltros();
+        // Al limpiar, usamos tu función pero pasándole toda la lista original
+        renderizarTablaEvelyn(productos); 
     });
-
-    // =====================================================================
-    // FIN APORTE EVELYN CONDOY
-    // =====================================================================
 
     // Carga inicial
     renderizarTabla();
