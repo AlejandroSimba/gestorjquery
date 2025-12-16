@@ -74,9 +74,9 @@ $(document).ready(function() {
     });
 
 
-    // ======================================================
-    // ZONA 2: CÓDIGO DE EVELYN CONDOY (PUNTOS 3, 4 y 5)
-    // ======================================================
+    // 
+    // APORTE EVELYN 
+    // 
 
     // 1. FUNCIÓN DE RENDERIZADO
     // lista como parámetro
