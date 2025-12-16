@@ -1,14 +1,10 @@
 $(document).ready(function() {
-    
-    // ======================================================
-    // ZONA 1: CÓDIGO COMÚN Y DE TU COMPAÑERO (NO TOCAR)
-    // ======================================================
-    
+
     // Array global de productos
     let productos = [];
 
-    // --- FUNCIÓN DE TU COMPAÑERO (INTACTA) ---
-    // Esta función solo sabe mostrar TODOS los productos.
+    
+    // Muestra TODOS los productos.
     function renderizarTabla() {
         const tbody = $('#productTableBody');
         const emptyMessage = $('#emptyTableMessage'); 
@@ -22,7 +18,7 @@ $(document).ready(function() {
             emptyMessage.show();
         } else {
             emptyMessage.hide();
-            // Bucle original de tu compañero
+            // Bucle 
             productos.forEach(function(producto) {
                 const precioFormateado = parseFloat(producto.precio).toFixed(2);
                 const nuevaFila = `
@@ -43,7 +39,7 @@ $(document).ready(function() {
         }
     }
 
-    // --- AGREGAR PRODUCTO (INTACTO) ---
+    // --- AGREGAR PRODUCTO ---
     $('#productForm').on('submit', function(e) {
         e.preventDefault();
         const nombre = $('#productName').val().trim();
@@ -67,19 +63,19 @@ $(document).ready(function() {
         $('#productForm')[0].reset();
         $('#productName').focus();
 
-        // AQUÍ LLAMA A LA FUNCIÓN DE TU COMPAÑERO (Muestra todos)
+        // LLAMAMOS A LA FUNCIÓN 
         renderizarTabla(); 
 
         Swal.fire({ icon: 'success', title: 'Agregado', timer: 1500, showConfirmButton: false });
     });
 
 
-    // 
-    // APORTE EVELYN 
+    //
+    // EVELYN CONDOY 
     // 
 
     // 1. FUNCIÓN DE RENDERIZADO
-    // lista como parámetro
+    
     function renderizarTablaEvelyn(listaFiltrada) {
         const tbody = $('#productTableBody');
         const emptyMessage = $('#emptyTableMessage'); 
@@ -96,7 +92,7 @@ $(document).ready(function() {
         } else {
             emptyMessage.hide();
             
-            // Usamos la lista filtrada 
+            // Usamos lista filtrada
             listaFiltrada.forEach(function(producto) {
                 const precioFormateado = parseFloat(producto.precio).toFixed(2);
                 const fila = `
@@ -125,7 +121,7 @@ $(document).ready(function() {
 
         let resultados = [];
 
-        // Ciclo FOR y IF (Requisito Rúbrica)
+        // Ciclo FOR y IF 
         for (let i = 0; i < productos.length; i++) {
             let p = productos[i];
             let pasaCat = false;
@@ -153,7 +149,7 @@ $(document).ready(function() {
             resultados.sort((a, b) => b.precio - a.precio);
         }
 
-        // IMPORTANTE: Aquí llamamos a la funcion
+        //  Aquí llamamos a la funcion
         renderizarTablaEvelyn(resultados);
     }
 
@@ -166,7 +162,7 @@ $(document).ready(function() {
         $('#filterCategory').val('all');
         $('#searchProduct').val('');
         $('#sortPrice').val('');
-        // 
+        
         renderizarTablaEvelyn(productos); 
     });
 
