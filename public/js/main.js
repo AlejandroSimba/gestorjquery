@@ -163,18 +163,31 @@ $(document).ready(function() {
         renderizarTablaEvelyn(productos); 
     });
 
-    // Carga inicial
-    renderizarTabla();
-});
 
-    // EXTRA: MODO OSCURO / CLARO
+    // EXTRA: MODO OSCURO / CLARO 
     
-    // 1. Revisar si ya había guardado preferencia antes
+    function activarModoOscuro() {
+        $('body').addClass('dark-mode');
+        // Cambiar icono a Sol y estilo del botón
+        $('#toggleDarkMode').html('<i class="fas fa-sun"></i>').removeClass('btn-outline-light').addClass('btn-light');
+        // Guardar en memoria del navegador
+        localStorage.setItem('theme', 'dark');
+    }
+
+    function desactivarModoOscuro() {
+        $('body').removeClass('dark-mode');
+        // Cambiar icono a Luna y estilo del botón
+        $('#toggleDarkMode').html('<i class="fas fa-moon"></i>').removeClass('btn-light').addClass('btn-outline-light');
+        // Guardar en memoria
+        localStorage.setItem('theme', 'light');
+    }
+
+    // 1. Revisar si ya había guardado preferencia antes al cargar la página
     if (localStorage.getItem('theme') === 'dark') {
         activarModoOscuro();
     }
 
-    // 2. Evento del botón
+    // 2. Evento del botón (Click)
     $('#toggleDarkMode').on('click', function() {
         if ($('body').hasClass('dark-mode')) {
             desactivarModoOscuro();
@@ -183,18 +196,4 @@ $(document).ready(function() {
         }
     });
 
-    function activarModoOscuro() {
-        $('body').addClass('dark-mode');
-        // Cambiar icono a Sol
-        $('#toggleDarkMode').html('<i class="fas fa-sun"></i>').removeClass('btn-outline-light').addClass('btn-light');
-        // Guardar en memoria del navegador
-        localStorage.setItem('theme', 'dark');
-    }
-
-    function desactivarModoOscuro() {
-        $('body').removeClass('dark-mode');
-        // Cambiar icono a Luna
-        $('#toggleDarkMode').html('<i class="fas fa-moon"></i>').removeClass('btn-light').addClass('btn-outline-light');
-        // Guardar en memoria
-        localStorage.setItem('theme', 'light');
-    }
+});
