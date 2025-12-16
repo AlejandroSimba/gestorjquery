@@ -1,9 +1,14 @@
 $(document).ready(function() {
     
-    // Array global de productos
+    // ==========================================
+    // VARIABLES Y FUNCIONES GLOBALES
+    // ==========================================
+    
     let productos = [];
 
-    // Esta función solo sabe mostrar TODOS los productos.
+    /**
+     * Función básica de renderizado (para mostrar todo)
+     */
     function renderizarTabla() {
         const tbody = $('#productTableBody');
         const emptyMessage = $('#emptyTableMessage'); 
@@ -38,42 +43,9 @@ $(document).ready(function() {
         }
     }
 
-    // --- AGREGAR PRODUCTO---
-    $('#productForm').on('submit', function(e) {
-        e.preventDefault();
-        const nombre = $('#productName').val().trim();
-        const precio = parseFloat($('#productPrice').val());
-        const categoria = $('#productCategory').val();
-
-        if (nombre === '' || isNaN(precio) || precio <= 0 || categoria === null) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Datos incompletos' });
-            return;
-        }
-
-        const nuevoProducto = {
-            id: Date.now().toString().slice(-4),
-            nombre: nombre,
-            precio: precio,
-            categoria: categoria
-        };
-
-        productos.push(nuevoProducto);
-        
-        $('#productForm')[0].reset();
-        $('#productName').focus();
-
-        renderizarTabla(); 
-
-        Swal.fire({ icon: 'success', title: 'Agregado', timer: 1500, showConfirmButton: false });
-    });
-
-
-    // 
-    // APORTE EVELYN 
-    // 
-
-    // 1. FUNCIÓN DE RENDERIZADO
-    // lista como parámetro
+    /**
+     * Renderiza la tabla basada en una lista filtrada (Lógica de Evelyn)
+     */
     function renderizarTablaEvelyn(listaFiltrada) {
         const tbody = $('#productTableBody');
         const emptyMessage = $('#emptyTableMessage'); 
@@ -82,7 +54,7 @@ $(document).ready(function() {
         // Limpiamos la tabla
         tbody.find('tr:not(#emptyTableMessage)').remove();
         
-        // Actualizamos contador con TU lista
+        // Actualizamos contador con la lista filtrada
         countBadge.text(`${listaFiltrada.length} productos`);
 
         if (listaFiltrada.length === 0) {
@@ -90,7 +62,6 @@ $(document).ready(function() {
         } else {
             emptyMessage.hide();
             
-            // Usamos TU lista filtrada para pintar
             listaFiltrada.forEach(function(producto) {
                 const precioFormateado = parseFloat(producto.precio).toFixed(2);
                 const fila = `
@@ -111,7 +82,9 @@ $(document).ready(function() {
         }
     }
 
-    // 2. LÓGICA DE FILTROS
+    /**
+     * Aplica filtros de Categoría, Búsqueda y Ordenamiento
+     */
     function aplicarFiltrosEvelyn() {
         const cat = $('#filterCategory').val();
         const busqueda = $('#searchProduct').val().toLowerCase();
@@ -150,21 +123,146 @@ $(document).ready(function() {
         renderizarTablaEvelyn(resultados);
     }
 
-    // 3.  EVENTOS
+    // ==========================================
+    // EVENTOS DEL DOM
+    // ==========================================
+
+    // 1. AGREGAR PRODUCTO
+    $('#productForm').on('submit', function(e) {
+        e.preventDefault();
+        const nombre = $('#productName').val().trim();
+        const precio = parseFloat($('#productPrice').val());
+        const categoria = $('#productCategory').val();
+
+        if (nombre === '' || isNaN(precio) || precio <= 0 || categoria === null) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Datos incompletos' });
+            return;
+        }
+
+        const nuevoProducto = {
+            id: Date.now().toString().slice(-4),
+            nombre: nombre,
+            precio: precio,
+            categoria: categoria
+        };
+
+        productos.push(nuevoProducto);
+        
+        $('#productForm')[0].reset();
+        $('#productName').focus();
+
+        // Aplicar filtros inmediatamente para ver si el nuevo producto cumple los criterios
+        aplicarFiltrosEvelyn();
+
+        Swal.fire({ icon: 'success', title: 'Agregado', timer: 1500, showConfirmButton: false });
+    });
+
+    // 2. ELIMINAR PRODUCTO
+    $(document).on('click', '.btn-eliminar', function() {
+        const id = $(this).data('id').toString();
+        // Eliminamos del array
+        productos = productos.filter(p => p.id !== id);
+        // Re-renderizamos manteniendo filtros
+        aplicarFiltrosEvelyn();
+        
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+        Toast.fire({ icon: 'success', title: 'Producto eliminado' });
+    });
+
+    // 3. EVENTOS DE FILTROS
     $('#filterCategory').on('change', function() { aplicarFiltrosEvelyn(); });
     $('#searchProduct').on('keyup', function() { aplicarFiltrosEvelyn(); });
     $('#sortPrice').on('change', function() { aplicarFiltrosEvelyn(); });
 
+    // 4. LIMPIAR FILTROS
     $('#clearAll').on('click', function() {
         $('#filterCategory').val('all');
         $('#searchProduct').val('');
         $('#sortPrice').val('');
-      
+        
         renderizarTablaEvelyn(productos); 
     });
 
+    // ==========================================
+    // ESTADÍSTICAS (Total, Promedio, Max, Min)
+    // ==========================================
 
-    // EXTRA: MODO OSCURO / CLARO 
+    $('#showStats').on('click', function () {
+        const $stats = $('#statsContent');
+
+        // 1. Validar si está vacío
+        if (productos.length === 0) {
+            $stats.html(`<div class="alert alert-secondary mb-0">No hay productos registrados para calcular.</div>`);
+            return;
+        }
+
+        // 2. Variables iniciales
+        let total = 0;
+        let sumaPrecios = 0;
+        let maxProducto = productos[0];
+        let minProducto = productos[0];
+
+        // 3. Ciclo para calcular (Lógica algorítmica)
+        for (let i = 0; i < productos.length; i++) {
+            const p = productos[i];
+            
+            // Contadores
+            total++;
+            sumaPrecios += p.precio;
+
+            // Comparar Máximo
+            if (p.precio > maxProducto.precio) {
+                maxProducto = p;
+            }
+
+            // Comparar Mínimo
+            if (p.precio < minProducto.precio) {
+                minProducto = p;
+            }
+        }
+
+        // 4. Calcular promedio
+        const promedio = sumaPrecios / total;
+
+        // 5. Renderizar HTML con los resultados
+        $stats.html(`
+            <div class="row g-2 text-start">
+                <div class="col-6">
+                    <div class="p-2 border rounded bg-light h-100">
+                        <small class="text-muted fw-bold d-block">TOTAL</small>
+                        <span class="fs-5">${total} items</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 border rounded bg-light h-100">
+                        <small class="text-muted fw-bold d-block">PROMEDIO</small>
+                        <span class="fs-5">$${promedio.toFixed(2)}</span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="p-2 border rounded bg-light border-success bg-opacity-10">
+                        <small class="text-success fw-bold d-block"><i class="fas fa-arrow-up"></i> MÁS CARO</small>
+                        <div>${maxProducto.nombre} ($${maxProducto.precio.toFixed(2)})</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="p-2 border rounded bg-light border-primary bg-opacity-10">
+                        <small class="text-primary fw-bold d-block"><i class="fas fa-arrow-down"></i> MÁS BARATO</small>
+                        <div>${minProducto.nombre} ($${minProducto.precio.toFixed(2)})</div>
+                    </div>
+                </div>
+            </div>
+        `);
+    });
+
+    // ==========================================
+    // MODO OSCURO (Dark Mode)
+    // ==========================================
     
     function activarModoOscuro() {
         $('body').addClass('dark-mode');
@@ -182,12 +280,12 @@ $(document).ready(function() {
         localStorage.setItem('theme', 'light');
     }
 
-    // 1. Revisar si ya había guardado preferencia antes al cargar la página
+    // A. Revisar preferencia guardada al cargar
     if (localStorage.getItem('theme') === 'dark') {
         activarModoOscuro();
     }
 
-    // 2. Evento del botón (Click)
+    // B. Evento del botón
     $('#toggleDarkMode').on('click', function() {
         if ($('body').hasClass('dark-mode')) {
             desactivarModoOscuro();
