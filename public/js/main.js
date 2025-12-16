@@ -3,7 +3,11 @@ $(document).ready(function() {
     // Array global de productos
     let productos = [];
 
-    
+    // ====== (AÑADIDO) Variables para eliminar con modal ======
+    let idParaEliminar = null;
+    const deleteModalEl = document.getElementById('deleteModal');
+    const deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl) : null;
+
     // Muestra TODOS los productos.
     function renderizarTabla() {
         const tbody = $('#productTableBody');
@@ -164,6 +168,117 @@ $(document).ready(function() {
         $('#sortPrice').val('');
         
         renderizarTablaEvelyn(productos); 
+    });
+
+    // ====== (AÑADIDO) INCISO 6: ESTADÍSTICAS DEL SISTEMA ======
+    $('#showStats').on('click', function() {
+        const cont = $('#statsContent');
+
+        if (productos.length === 0) {
+            cont.html('<p class="text-muted">No hay productos registrados para calcular estadísticas.</p>');
+            return;
+        }
+
+        // Cálculos con estructura iterativa (FOR)
+        let total = 0;
+        let suma = 0;
+
+        let masCaro = productos[0];
+        let masBarato = productos[0];
+
+        for (let i = 0; i < productos.length; i++) {
+            const p = productos[i];
+            total++;
+            suma += p.precio;
+
+            if (p.precio > masCaro.precio) masCaro = p;
+            if (p.precio < masBarato.precio) masBarato = p;
+        }
+
+        const promedio = suma / total;
+
+        cont.html(`
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="p-3 border rounded bg-light">
+                        <div class="fw-bold"><i class="fas fa-boxes me-1"></i>Total</div>
+                        <div class="fs-4">${total}</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-3 border rounded bg-light">
+                        <div class="fw-bold"><i class="fas fa-calculator me-1"></i>Promedio</div>
+                        <div class="fs-4">$${promedio.toFixed(2)}</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="p-3 border rounded bg-light text-start">
+                        <div class="fw-bold"><i class="fas fa-arrow-up me-1"></i>Producto más caro</div>
+                        <div>${masCaro.nombre} <span class="text-muted">(#${masCaro.id})</span> — <span class="fw-bold">$${masCaro.precio.toFixed(2)}</span></div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="p-3 border rounded bg-light text-start">
+                        <div class="fw-bold"><i class="fas fa-arrow-down me-1"></i>Producto más barato</div>
+                        <div>${masBarato.nombre} <span class="text-muted">(#${masBarato.id})</span> — <span class="fw-bold">$${masBarato.precio.toFixed(2)}</span></div>
+                    </div>
+                </div>
+            </div>
+        `);
+    });
+
+    // ====== (AÑADIDO) INCISO 7 (BONUS): ELIMINAR CON splice() ======
+    // 1) Click en botón eliminar: abrir modal y guardar ID
+    $(document).on('click', '.btn-eliminar', function() {
+        const id = String($(this).data('id'));
+        idParaEliminar = id;
+
+        // Buscar nombre con ciclo FOR (sin métodos extra)
+        let nombreEncontrado = '';
+        for (let i = 0; i < productos.length; i++) {
+            if (String(productos[i].id) === id) {
+                nombreEncontrado = productos[i].nombre;
+                break;
+            }
+        }
+
+        $('#productToDeleteName').text(nombreEncontrado || 'este producto');
+
+        if (deleteModal) {
+            deleteModal.show();
+        } else {
+            // fallback por si no cargó bootstrap modal (raro)
+            if (confirm('¿Eliminar el producto?')) {
+                $('#confirmDelete').click();
+            }
+        }
+    });
+
+    // 2) Confirmar eliminación: splice() y actualizar tabla
+    $('#confirmDelete').on('click', function() {
+        if (idParaEliminar === null) return;
+
+        // Buscar índice con FOR
+        let index = -1;
+        for (let i = 0; i < productos.length; i++) {
+            if (String(productos[i].id) === String(idParaEliminar)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index !== -1) {
+            productos.splice(index, 1); // ✅ obligatorio
+        }
+
+        idParaEliminar = null;
+
+        if (deleteModal) deleteModal.hide();
+
+        // Actualizar tabla respetando filtros actuales
+        aplicarFiltrosEvelyn();
+
+        Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1200, showConfirmButton: false });
     });
 
     // Carga inicial

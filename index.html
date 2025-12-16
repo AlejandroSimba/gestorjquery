@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Productos</title>
-    
+
     <link href="public/vendor/bootstrap-5.0.2-dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="public/vendor/fontawesome-free-7.1.0-web/css/all.min.css">
     <link rel="stylesheet" href="public/css/style.css">
@@ -49,7 +49,7 @@
                                     <input type="text" class="form-control" id="productName" placeholder="Ej: Arroz, Leche, Detergente">
                                     <div class="invalid-feedback">Por favor ingresa el nombre del producto.</div>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="productPrice" class="form-label fw-bold">
                                         <i class="fas fa-dollar-sign me-1"></i>Precio
@@ -60,7 +60,7 @@
                                     </div>
                                     <div class="invalid-feedback">Por favor ingresa un precio válido.</div>
                                 </div>
-                                
+
                                 <div class="mb-4">
                                     <label for="productCategory" class="form-label fw-bold">
                                         <i class="fas fa-list-alt me-1"></i>Categoría
@@ -73,7 +73,7 @@
                                     </select>
                                     <div class="invalid-feedback">Por favor selecciona una categoría.</div>
                                 </div>
-                                
+
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-success btn-lg">
                                         <i class="fas fa-plus me-2"></i>Agregar Producto
@@ -82,7 +82,7 @@
                             </form>
                         </div>
                     </div>
-                    
+
                     <!-- Card para filtros y ordenamiento -->
                     <div class="card shadow border-0 mb-4">
                         <div class="card-header bg-info text-white">
@@ -100,7 +100,7 @@
                                     <option value="Limpieza">Limpieza</option>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="searchProduct" class="form-label fw-bold">Buscar por nombre</label>
                                 <div class="input-group">
@@ -110,7 +110,7 @@
                                     <input type="text" class="form-control" id="searchProduct" placeholder="Escribe para buscar...">
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="sortPrice" class="form-label fw-bold">Ordenar por precio</label>
                                 <select class="form-select" id="sortPrice">
@@ -121,7 +121,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Card para estadísticas -->
                     <div class="card shadow border-0">
                         <div class="card-header bg-warning text-dark">
@@ -141,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Columna derecha: Tabla de productos -->
                 <div class="col-lg-8">
                     <div class="card shadow border-0 h-100">
@@ -214,7 +214,7 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <p class="mb-0">
-                            <i class="fas fa-code me-1"></i> 
+                            <i class="fas fa-code me-1"></i>
                             Estructuras de control, arrays, objetos, eventos y manipulación del DOM
                         </p>
                     </div>
@@ -247,9 +247,333 @@
 
     <script src="public/vendor/jquery/jquery-3.7.1.min.js"></script>
     <script src="public/vendor/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="public/vendor/sweetalert2/sweetalert2@11.js"></script>
-    <script src="public/js/main.js"></script>
-    
+
+    <!-- ✅ CÓDIGO UNIDO (reemplaza main.js) -->
+    <script>
+        $(document).ready(function () {
+            // ====== DATA ======
+            let products = [];
+            let nextId = 1;
+
+            // Para eliminación con modal
+            let pendingDeleteId = null;
+            const deleteModalEl = document.getElementById('deleteModal');
+            const deleteModal = new bootstrap.Modal(deleteModalEl);
+
+            // ====== HELPERS ======
+            function formatPrice(n) {
+                return Number(n).toFixed(2);
+            }
+
+            function showFormAlert(message) {
+                // mensaje de advertencia con Bootstrap (sin modificar el HTML original)
+                const $cardBody = $('#productForm').closest('.card-body');
+                let $alert = $cardBody.find('#formAlert');
+                if ($alert.length === 0) {
+                    $alert = $(`
+                        <div id="formAlert" class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <span id="formAlertText"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `);
+                    $cardBody.prepend($alert);
+                }
+                $alert.find('#formAlertText').text(message);
+            }
+
+            function clearFormAlert() {
+                $('#formAlert').remove();
+            }
+
+            function resetValidation() {
+                $('#productName').removeClass('is-invalid');
+                $('#productPrice').removeClass('is-invalid');
+                $('#productCategory').removeClass('is-invalid');
+            }
+
+            function getFilteredSortedProducts() {
+                const filterCat = $('#filterCategory').val();
+                const search = ($('#searchProduct').val() || '').trim().toLowerCase();
+                const sort = $('#sortPrice').val();
+
+                // 1) Filtrar por categoría + buscador (usando condicionales y ciclos)
+                let result = [];
+                for (let i = 0; i < products.length; i++) {
+                    const p = products[i];
+
+                    let passCat = true;
+                    if (filterCat !== 'all') {
+                        passCat = (p.category === filterCat);
+                    }
+
+                    let passSearch = true;
+                    if (search !== '') {
+                        passSearch = p.name.toLowerCase().includes(search);
+                    }
+
+                    if (passCat && passSearch) {
+                        result.push(p);
+                    }
+                }
+
+                // 2) Ordenar por precio (asc/desc) y re-renderizar
+                if (sort === 'asc') {
+                    result.sort(function (a, b) { return a.price - b.price; });
+                } else if (sort === 'desc') {
+                    result.sort(function (a, b) { return b.price - a.price; });
+                }
+
+                return result;
+            }
+
+            function updateCountBadge(n) {
+                $('#productCount').text(`${n} producto${n === 1 ? '' : 's'}`);
+            }
+
+            function renderTable() {
+                const list = getFilteredSortedProducts();
+                const $tbody = $('#productTableBody');
+                $tbody.empty();
+
+                if (list.length === 0) {
+                    // mostrar mensaje vacío
+                    $tbody.append($('#emptyTableMessage').clone(true, true).show());
+                    updateCountBadge(0);
+                    return;
+                }
+
+                // Ocultar mensaje vacío si estaba
+                // (como lo reconstruimos, ya no existe, pero mantenemos lógica simple)
+                // Render dinámico con ciclo
+                for (let i = 0; i < list.length; i++) {
+                    const p = list[i];
+
+                    const row = `
+                        <tr>
+                            <td class="ps-4 fw-bold">#${p.id}</td>
+                            <td>${p.name}</td>
+                            <td>$${formatPrice(p.price)}</td>
+                            <td>
+                                <span class="badge bg-${p.category === 'Abarrotes' ? 'success' : (p.category === 'Bebidas' ? 'primary' : 'warning')} text-${p.category === 'Limpieza' ? 'dark' : 'white'}">
+                                    ${p.category}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-outline-danger btn-sm btn-delete" data-id="${p.id}" data-name="${p.name}">
+                                    <i class="fas fa-trash-alt me-1"></i>Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(row);
+                }
+
+                updateCountBadge(list.length);
+            }
+
+            // ====== INCISO 1: REGISTRO ======
+            $('#productForm').on('submit', function (e) {
+                e.preventDefault();
+                clearFormAlert();
+                resetValidation();
+
+                const name = ($('#productName').val() || '').trim();
+                const priceRaw = $('#productPrice').val();
+                const category = $('#productCategory').val();
+
+                let hasError = false;
+
+                if (name === '') {
+                    $('#productName').addClass('is-invalid');
+                    hasError = true;
+                }
+
+                const price = Number(priceRaw);
+                if (priceRaw === '' || isNaN(price) || price < 0) {
+                    $('#productPrice').addClass('is-invalid');
+                    hasError = true;
+                }
+
+                if (!category) {
+                    $('#productCategory').addClass('is-invalid');
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    showFormAlert('Revisa los campos: todos son obligatorios y el precio debe ser válido.');
+                    return;
+                }
+
+                // Crear objeto producto + guardar en array
+                const product = {
+                    id: nextId++,
+                    name: name,
+                    price: price,
+                    category: category
+                };
+
+                products.push(product);
+
+                // limpiar form
+                $('#productName').val('');
+                $('#productPrice').val('');
+                $('#productCategory').val('');
+
+                // re-render
+                renderTable();
+
+                // feedback
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Producto agregado',
+                    text: `${product.name} fue registrado correctamente.`,
+                    timer: 1400,
+                    showConfirmButton: false
+                });
+            });
+
+            // ====== INCISO 3: FILTRO POR CATEGORÍA ======
+            $('#filterCategory').on('change', function () {
+                renderTable();
+            });
+
+            // ====== INCISO 4: BUSCADOR EN VIVO (keyup) ======
+            $('#searchProduct').on('keyup', function () {
+                renderTable();
+            });
+
+            // ====== INCISO 5: ORDENAMIENTO POR PRECIO ======
+            $('#sortPrice').on('change', function () {
+                renderTable();
+            });
+
+            // ====== INCISO 6: ESTADÍSTICAS DEL SISTEMA ======
+            $('#showStats').on('click', function () {
+                const $stats = $('#statsContent');
+
+                if (products.length === 0) {
+                    $stats.html(`<p class="text-muted">No hay productos registrados para calcular estadísticas.</p>`);
+                    return;
+                }
+
+                // Cálculos con estructura iterativa
+                let total = 0;
+                let sum = 0;
+
+                let maxP = products[0];
+                let minP = products[0];
+
+                for (let i = 0; i < products.length; i++) {
+                    const p = products[i];
+                    total++;
+                    sum += p.price;
+
+                    if (p.price > maxP.price) maxP = p;
+                    if (p.price < minP.price) minP = p;
+                }
+
+                const avg = sum / total;
+
+                $stats.html(`
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 border rounded bg-light">
+                                <div class="fw-bold"><i class="fas fa-boxes me-1"></i>Total</div>
+                                <div class="fs-4">${total}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 border rounded bg-light">
+                                <div class="fw-bold"><i class="fas fa-calculator me-1"></i>Promedio</div>
+                                <div class="fs-4">$${formatPrice(avg)}</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light text-start">
+                                <div class="fw-bold"><i class="fas fa-arrow-up me-1"></i>Más caro</div>
+                                <div>${maxP.name} <span class="text-muted">(#${maxP.id})</span> — <span class="fw-bold">$${formatPrice(maxP.price)}</span></div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light text-start">
+                                <div class="fw-bold"><i class="fas fa-arrow-down me-1"></i>Más barato</div>
+                                <div>${minP.name} <span class="text-muted">(#${minP.id})</span> — <span class="fw-bold">$${formatPrice(minP.price)}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+
+            // ====== INCISO 7 (BONUS): ELIMINAR CON splice() ======
+            $(document).on('click', '.btn-delete', function () {
+                const id = Number($(this).data('id'));
+                const name = String($(this).data('name') || '');
+
+                pendingDeleteId = id;
+                $('#productToDeleteName').text(name);
+                deleteModal.show();
+            });
+
+            $('#confirmDelete').on('click', function () {
+                if (pendingDeleteId == null) return;
+
+                // buscar índice con ciclo y eliminar con splice()
+                let index = -1;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].id === pendingDeleteId) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index !== -1) {
+                    products.splice(index, 1); // ✅ splice() obligatorio
+                }
+
+                pendingDeleteId = null;
+                deleteModal.hide();
+                renderTable();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Producto eliminado',
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+            });
+
+            // ====== LIMPIAR TODO ======
+            $('#clearAll').on('click', function () {
+                if (products.length === 0) {
+                    Swal.fire({ icon: 'info', title: 'No hay productos', timer: 1200, showConfirmButton: false });
+                    return;
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¿Limpiar todo?',
+                    text: 'Se eliminarán todos los productos registrados.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, limpiar',
+                    cancelButtonText: 'Cancelar'
+                }).then(function (res) {
+                    if (res.isConfirmed) {
+                        products = [];
+                        nextId = 1;
+                        $('#statsContent').html('<p class="text-muted">Haz clic en el botón para ver las estadísticas</p>');
+                        renderTable();
+                    }
+                });
+            });
+
+            // Render inicial
+            renderTable();
+        });
+    </script>
+
+    <!-- ⚠️ Si usas el código unido, NO cargues main.js -->
+    <!-- <script src="public/js/main.js"></script> -->
+
 </body>
 </html>
