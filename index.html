@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="public/vendor/fontawesome-free-7.1.0-web/css/all.min.css">
     <link rel="stylesheet" href="public/css/style.css">
 </head>
+
 <body>
     <div class="container-fluid px-0">
         <header class="bg-primary text-white py-4 shadow">
@@ -31,7 +33,7 @@
 
         <div class="container my-5">
             <div class="row">
-                <!-- Columna izquierda: Formulario y controles -->
+                <!-- Columna izquierda: Formulario y estadísticas -->
                 <div class="col-lg-4 mb-4">
                     <!-- Card para agregar productos -->
                     <div class="card shadow border-0 mb-4">
@@ -46,7 +48,8 @@
                                     <label for="productName" class="form-label fw-bold">
                                         <i class="fas fa-tag me-1"></i>Nombre del producto
                                     </label>
-                                    <input type="text" class="form-control" id="productName" placeholder="Ej: Arroz, Leche, Detergente">
+                                    <input type="text" class="form-control" id="productName"
+                                        placeholder="Ej: Arroz, Leche, Detergente">
                                     <div class="invalid-feedback">Por favor ingresa el nombre del producto.</div>
                                 </div>
 
@@ -56,7 +59,8 @@
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
-                                        <input type="number" class="form-control" id="productPrice" min="0" step="0.01" placeholder="0.00">
+                                        <input type="number" class="form-control" id="productPrice" min="0" step="0.01"
+                                            placeholder="0.00">
                                     </div>
                                     <div class="invalid-feedback">Por favor ingresa un precio válido.</div>
                                 </div>
@@ -83,45 +87,6 @@
                         </div>
                     </div>
 
-                    <!-- Card para filtros y ordenamiento -->
-                    <div class="card shadow border-0 mb-4">
-                        <div class="card-header bg-info text-white">
-                            <h3 class="h5 mb-0">
-                                <i class="fas fa-filter me-2"></i>Filtros y Ordenamiento
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="filterCategory" class="form-label fw-bold">Filtrar por categoría</label>
-                                <select class="form-select" id="filterCategory">
-                                    <option value="all">Todos los productos</option>
-                                    <option value="Abarrotes">Abarrotes</option>
-                                    <option value="Bebidas">Bebidas</option>
-                                    <option value="Limpieza">Limpieza</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="searchProduct" class="form-label fw-bold">Buscar por nombre</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <input type="text" class="form-control" id="searchProduct" placeholder="Escribe para buscar...">
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="sortPrice" class="form-label fw-bold">Ordenar por precio</label>
-                                <select class="form-select" id="sortPrice">
-                                    <option value="">Sin ordenar</option>
-                                    <option value="asc">Precio Ascendente</option>
-                                    <option value="desc">Precio Descendente</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Card para estadísticas -->
                     <div class="card shadow border-0">
                         <div class="card-header bg-warning text-dark">
@@ -142,8 +107,9 @@
                     </div>
                 </div>
 
-                <!-- Columna derecha: Tabla de productos -->
+                <!-- Columna derecha: Filtros y Tabla de productos -->
                 <div class="col-lg-8">
+                    <!-- Tabla de productos -->
                     <div class="card shadow border-0 h-100">
                         <div class="card-header bg-primary text-white">
                             <div class="row align-items-center">
@@ -157,6 +123,43 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Sección de filtros -->
+                        <div class="card-header bg-light border-bottom">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="filterCategory" class="form-label fw-bold">Filtrar por categoría</label>
+                                    <select class="form-select" id="filterCategory">
+                                        <option value="all">Todos los productos</option>
+                                        <option value="Abarrotes">Abarrotes</option>
+                                        <option value="Bebidas">Bebidas</option>
+                                        <option value="Limpieza">Limpieza</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-5 mb-3">
+                                    <label for="searchProduct" class="form-label fw-bold">Buscar por nombre</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                        <input type="text" class="form-control" id="searchProduct"
+                                            placeholder="Escribe para buscar...">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="sortPrice" class="form-label fw-bold">Ordenar por precio</label>
+                                    <select class="form-select" id="sortPrice">
+                                        <option value="">Sin ordenar</option>
+                                        <option value="asc">Precio Ascendente</option>
+                                        <option value="desc">Precio Descendente</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla -->
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0">
@@ -170,7 +173,6 @@
                                         </tr>
                                     </thead>
                                     <tbody id="productTableBody">
-                                        <!-- Los productos se cargarán aquí dinámicamente -->
                                         <tr id="emptyTableMessage">
                                             <td colspan="5" class="text-center py-5">
                                                 <div class="text-muted">
@@ -231,7 +233,8 @@
                     <h5 class="modal-title">
                         <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>¿Estás seguro de que deseas eliminar el producto <strong id="productToDeleteName"></strong>?</p>
@@ -528,7 +531,7 @@
                 }
 
                 if (index !== -1) {
-                    products.splice(index, 1); // ✅ splice() obligatorio
+                    products.splice(index, 1);
                 }
 
                 pendingDeleteId = null;
@@ -571,17 +574,6 @@
             renderTable();
         });
     </script>
-
-    <script src="public/vendor/jquery/jquery-3.7.1.min.js"></script>
-    <script src="public/vendor/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script src="public/vendor/sweetalert2/sweetalert2@11.js"></script>
-
-    <script src="public/js/main.js"></script>
 </body>
 
-</html>
-
-
-</body>
 </html>
