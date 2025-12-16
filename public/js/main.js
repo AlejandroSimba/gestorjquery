@@ -1,30 +1,33 @@
 $(document).ready(function() {
-    //Array de objetos productos
-    let productos = [];
     
-    // FUNCIONES PARA LISTAR
-    //Función para renderizar la tabla de productos
-    function renderizarTabla() {
-        // CORREGIDO: El ID en tu HTML es productTableBody (con B mayúscula)
+    // Array global de productos
+    let productos = [];
+
+    // 
+    // FUNCIÓN DE RENDERIZADO 
+    // 
+    function renderizarTabla(listaOpcional) {
+        // Si hay una lista filtrada, usamos esa. Si no, usamos 'productos'
+        const datosAMostrar = listaOpcional || productos;
+
         const tbody = $('#productTableBody');
         const emptyMessage = $('#emptyTableMessage'); 
-        // CORREGIDO: El ID en tu HTML es productCount
-        const counBadge = $('#productCount');
+        const countBadge = $('#productCount');
 
-        //Limpiar el contenido actual de la tabla
+        // Limpiar contenido actual
         tbody.find('tr:not(#emptyTableMessage)').remove();
 
-        //Actualizamos el contador de productos
-        counBadge.text(`${productos.length} productos`);
+        // Actualizar contador
+        countBadge.text(`${datosAMostrar.length} productos`);
 
-        //Verificamos si hay productos para mostrar
-        if (productos.length === 0) {
+        // Mostrar u ocultar mensaje de vacío
+        if (datosAMostrar.length === 0) {
             emptyMessage.show();
         } else {
             emptyMessage.hide();
         
-            //Recorrer el array de productos y crear filas en la tabla
-            productos.forEach(function(producto) {
+            // Recorrer el array y crear filas
+            datosAMostrar.forEach(function(producto) {
                 const precioFormateado = parseFloat(producto.precio).toFixed(2);
 
                 const nuevaFila = `
@@ -40,15 +43,14 @@ $(document).ready(function() {
                         </td>
                     </tr>
                 `;
-                
-                // CORREGIDO: Aquí decías "fila", pero la variable de arriba es "nuevaFila"
                 tbody.append(nuevaFila);
             });
         }
     }
 
-    // FUNCIONES PARA AGREGAR
-    //Función para agregar un nuevo producto
+    // ==========================================
+    // FUNCIÓN AGREGAR (PUNTO 1)
+    // ==========================================
     $('#productForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -74,10 +76,12 @@ $(document).ready(function() {
         };
 
         productos.push(nuevoProducto);
-        renderizarTabla();
         
         $('#productForm')[0].reset();
         $('#productName').focus();
+
+        // Actualizamos la tabla (respetando filtros si existen)
+        aplicarFiltros(); 
 
         Swal.fire({
             icon: 'success',
@@ -87,9 +91,10 @@ $(document).ready(function() {
             showConfirmButton: false
         });
     });
-    // 
-    //  APORTE EVELYN CONDOY (
-    // 
+
+    // =====================================================================
+    // INICIO APORTE EVELYN CONDOY (Puntos 3, 4 y 5)
+    // =====================================================================
 
     function aplicarFiltros() {
         // 1. Capturar valores de los inputs
@@ -169,12 +174,10 @@ $(document).ready(function() {
         aplicarFiltros();
     });
 
-    // 
+    // =====================================================================
     // FIN APORTE EVELYN CONDOY
-    // 
+    // =====================================================================
 
     // Carga inicial
     renderizarTabla();
 });
-
-    
