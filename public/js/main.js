@@ -88,7 +88,7 @@ $(document).ready(function() {
         // Limpiamos la tabla
         tbody.find('tr:not(#emptyTableMessage)').remove();
         
-        // Actualizamos contador con TU lista
+        // Actualizamos contador 
         countBadge.text(`${listaFiltrada.length} productos`);
 
         if (listaFiltrada.length === 0) {
@@ -96,7 +96,7 @@ $(document).ready(function() {
         } else {
             emptyMessage.hide();
             
-            // Usamos TU lista filtrada para pintar
+            // Usamos la lista filtrada 
             listaFiltrada.forEach(function(producto) {
                 const precioFormateado = parseFloat(producto.precio).toFixed(2);
                 const fila = `
@@ -153,7 +153,7 @@ $(document).ready(function() {
             resultados.sort((a, b) => b.precio - a.precio);
         }
 
-        // IMPORTANTE: Aquí llamamos a TU función, no a la de tu compañero
+        // IMPORTANTE: Aquí llamamos a la funcion
         renderizarTablaEvelyn(resultados);
     }
 
@@ -166,7 +166,7 @@ $(document).ready(function() {
         $('#filterCategory').val('all');
         $('#searchProduct').val('');
         $('#sortPrice').val('');
-        // Al limpiar, usamos tu función pero pasándole toda la lista original
+        // 
         renderizarTablaEvelyn(productos); 
     });
 
